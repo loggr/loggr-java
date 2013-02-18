@@ -112,6 +112,10 @@ public class LogClient {
         {
         	qs = (String)appendQuerystringNameValue("data", "@html" + System.getProperty("line.separator") + Event.getData(), qs);
         }
+        else if (Event.getDataType() == DataType.json)
+        {
+        	qs = (String)appendQuerystringNameValue("data", "@json" + System.getProperty("line.separator") + Event.getData(), qs);
+        }
         else
         {
         	qs = (String)appendQuerystringNameValue("data", Event.getData(), qs);
