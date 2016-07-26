@@ -5,30 +5,26 @@ import java.io.StringWriter;
 
 public class ExceptionFormatter {
 
-	private ExceptionFormatter(){}
-	
-	public static String FormatType(String type)
-    {
-        if (type == null || type.length() == 0)
-        {
+    private ExceptionFormatter() {
+    }
+
+    public static String FormatType(String type) {
+        if (type == null || type.length() == 0) {
             return "";
         }
 
         int lastDotIndex = Common.GetLastIndexOf(type, '.');
 
-        if (lastDotIndex > 0)
-        {
+        if (lastDotIndex > 0) {
             type = type.substring(lastDotIndex + 1);
         }
 
         final String conventionalSuffix = "Exception";
 
-        if (type.length() > conventionalSuffix.length())
-        {
+        if (type.length() > conventionalSuffix.length()) {
             int suffixIndex = type.length() - conventionalSuffix.length();
 
-            if (type.substring(suffixIndex).equalsIgnoreCase(conventionalSuffix))
-            {
+            if (type.substring(suffixIndex).equalsIgnoreCase(conventionalSuffix)) {
                 type = type.substring(0, suffixIndex);
             }
         }
@@ -36,23 +32,19 @@ public class ExceptionFormatter {
         return type;
     }
 
-    public static String FormatType(Exception ex)
-    {
-        if (ex == null)
-        {
+    public static String FormatType(Exception ex) {
+        if (ex == null) {
             throw new java.lang.IllegalArgumentException("error");
         }
 
         return FormatType(ex.getClass().getCanonicalName());
     }
 
-    public static String Format(Exception ex)
-    {
+    public static String Format(Exception ex) {
         return Format(ex, null);
     }
 
-    public static String Format(Exception ex, Object traceObject)
-    {
+    public static String Format(Exception ex, Object traceObject) {
         String res = "";
 
         // send basic info
@@ -76,13 +68,11 @@ public class ExceptionFormatter {
 //            res += string.Format("<b>Script Name</b>: %s<br />", HttpContext.Current.Request.ServerVariables["SCRIPT_NAME"]);
 //        }
 
-        if (traceObject != null)
-        {
+        if (traceObject != null) {
             res += "<br />";
             res += "<b>Traced Object(s)</b><br />";
             res += "<br />";
-            if (traceObject != null)
-            {
+            if (traceObject != null) {
                 res += ObjectDumper.dumpObject(traceObject, 1);
             }
         }
@@ -96,30 +86,24 @@ public class ExceptionFormatter {
         return res;
     }
 
-    protected static String FormatStack(Exception Ex, String Buffer)
-    {
-    	String retVal = Buffer;
-    	
-        if (Ex.getCause() != null)
-        {
-            FormatStack((Exception)Ex.getCause(), retVal);
+    protected static String FormatStack(Exception Ex, String Buffer) {
+        String retVal = Buffer;
+
+        if (Ex.getCause() != null) {
+            FormatStack((Exception) Ex.getCause(), retVal);
         }
         retVal += String.format("[%s: %s]<br />", Ex.getClass().getCanonicalName(), Ex.getMessage());
-        if (Ex.getStackTrace() != null)
-        {
-        	retVal += getStackTrace(Ex);
-        }
-        else
-        {
-        	retVal += "No stack trace";
+        if (Ex.getStackTrace() != null) {
+            retVal += getStackTrace(Ex);
+        } else {
+            retVal += "No stack trace";
         }
         retVal += "<br/>";
         retVal += "<br/>";
         return (retVal);
     }
-    
-    public static String getStackTrace(Throwable t)
-    {
+
+    public static String getStackTrace(Throwable t) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw, true);
         t.printStackTrace(pw);
