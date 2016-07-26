@@ -4,11 +4,12 @@ import java.io.InputStream;
 
 public class AsyncWebResponse {
 	private InputStream body;
-	
-	public AsyncWebResponse(InputStream body){
+
+	public AsyncWebResponse(InputStream body) {
 		this.body = body;
 	}
-	public InputStream getBody(){
+
+	public InputStream getBody() {
 		return body;
 	}
 }
