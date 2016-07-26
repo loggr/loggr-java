@@ -1,18 +1,39 @@
 package net.loggr.utility;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class Configuration {
-    private static final String API_KEY_PROPERTY_NAME = "LOGGR_API_KEY";
-    private static final String LOG_KEY_PROPERTY_NAME = "LOGGR_LOG_KEY";
-    private static final String SERVER_PROPERTY_NAME = "LOGGR_SERVER";
+
+    private static final Logger logger = LogManager.getLogger(Configuration.class);
+
+    private static final String API_KEY_PROPERTY_NAME = "apiKey";
+    private static final String LOG_KEY_PROPERTY_NAME = "logKey";
+    private static final String SERVER_PROPERTY_NAME = "server";
     private static final String DEFAULT_SERVER_PROPERTY = "post.loggr.net";
-    private static final String VERSION_PROPERTY_NAME = "LOGGR_VERSION";
+    private static final String VERSION_PROPERTY_NAME = "version";
     private static final String DEFAULT_VERSION_PROPERTY = "1";
-    private static final String TAGS_PROPERTY_NAME = "LOGGR_TAGS";
-    private static final String SOURCE_PROPERTY_NAME = "LOGGR_SOURCE";
+    private static final String TAGS_PROPERTY_NAME = "tags";
+    private static final String SOURCE_PROPERTY_NAME = "source";
+
+    private static final Properties loadedProperties = new Properties();
+
+    static {
+        try {
+            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            InputStream resourceStream = loader.getResourceAsStream("app.properties");
+            loadedProperties.load(resourceStream);
+        } catch (IOException ex) {
+            logger.error(ex);
+        }
+    }
 
     private Configuration() {
     }
@@ -82,6 +103,10 @@ public class Configuration {
         String propValue = System.getenv(propName);
         if (StringUtils.isBlank(propValue)) {
             propValue = System.getProperty(propName);
+        }
+
+        if (StringUtils.isBlank(propValue) && loadedProperties.containsKey(propName)) {
+            propValue = loadedProperties.getProperty(propName);
         }
 
         return propValue;
