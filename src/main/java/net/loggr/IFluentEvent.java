@@ -1,28 +1,29 @@
 /**
- *
+ * 
  */
 package net.loggr;
 
 
 /**
  * @author Justin Kunder
+ *
  */
 public interface IFluentEvent<T> {
-    T text(String text);
+	T text(String text);
 
-    T link(String link);
+	T link(String link);
 
-    T source(String source);
+	T source(String source);
 
-    T user(String user);
+	T user(String user);
 
-    T tags(String tags);
+	T tags(String tags);
 
-    T value(double value);
+	T value(double value);
 
-    T data(String data);
+	T data(String data);
 
-    T dataType(DataType dataType);
+	T dataType(DataType dataType);
 
-    public Event event();
+	Event event();
 }

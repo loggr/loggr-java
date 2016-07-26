@@ -17,12 +17,12 @@ public class Events {
         return createFromException(ex, null);
     }
 
-    public static FluentEvent createFromException(Exception ex, Object traceObject) {
+    private static FluentEvent createFromException(Exception ex, Object traceObject) {
         return create()
                 .text(ex.getMessage())
-                .tags("error " + ExceptionFormatter.FormatType(ex))
+                .tags("error " + ExceptionFormatter.formatType(ex))
                 .source(ex.getClass() == null ? "" : ex.getClass().toString())
-                .data(ExceptionFormatter.Format(ex, traceObject))
+                .data(ExceptionFormatter.format(ex, traceObject))
                 .dataType(DataType.html);
     }
 
@@ -30,7 +30,7 @@ public class Events {
         return createFromVariable(traceObject, 1);
     }
 
-    public static FluentEvent createFromVariable(Object traceObject, int depth) {
+    private static FluentEvent createFromVariable(Object traceObject, int depth) {
         return create()
                 .data(ObjectDumper.dumpObject(traceObject, depth))
                 .dataType(DataType.html);

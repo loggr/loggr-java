@@ -24,11 +24,11 @@ public abstract class FluentEventBase<T> implements IFluentEvent<T> {
         return getReturnClass();
     }
 
-    public T post(boolean Async) {
+    public T post(boolean async) {
         if (_client == null) {
             _client = new LogClient();
         }
-        _client.post(this._event, Async);
+        _client.post(this._event, async);
         return getReturnClass();
     }
 
@@ -37,13 +37,13 @@ public abstract class FluentEventBase<T> implements IFluentEvent<T> {
         return getReturnClass();
     }
 
-    public T text(String Text) {
-        this._event.setText(assignWithMacro(Text, this._event.getText()));
+    public T text(String text) {
+        this._event.setText(assignWithMacro(text, this._event.getText()));
         return getReturnClass();
     }
 
-    public T text(String FormatString, Object... FormatArguments) {
-        return text(String.format(FormatString, FormatArguments));
+    public T text(String formatString, Object... formatArguments) {
+        return text(String.format(formatString, formatArguments));
     }
 
     public T addText(String Text) {
@@ -51,59 +51,59 @@ public abstract class FluentEventBase<T> implements IFluentEvent<T> {
         return getReturnClass();
     }
 
-    public T addText(String FormatString, Object... FormatArguments) {
-        return addText(String.format(FormatString, FormatArguments));
+    public T addText(String formatString, Object... formatArguments) {
+        return addText(String.format(formatString, formatArguments));
     }
 
-    public T link(String Link) {
-        this._event.setLink(assignWithMacro(Link, this._event.getLink()));
+    public T link(String link) {
+        this._event.setLink(assignWithMacro(link, this._event.getLink()));
         return getReturnClass();
     }
 
-    public T link(String FormatString, Object... FormatArguments) {
-        return link(String.format(FormatString, FormatArguments));
+    public T link(String formatString, Object... formatArguments) {
+        return link(String.format(formatString, formatArguments));
     }
 
-    public T source(String Source) {
-        this._event.setSource(assignWithMacro(Source, this._event.getSource()));
+    public T source(String source) {
+        this._event.setSource(assignWithMacro(source, this._event.getSource()));
         return getReturnClass();
     }
 
-    public T source(String FormatString, Object... FormatArguments) {
-        return source(String.format(FormatString, FormatArguments));
+    public T source(String formatString, Object... formatArguments) {
+        return source(String.format(formatString, formatArguments));
     }
 
-    public T user(String User) {
-        this._event.setUser(assignWithMacro(User, this._event.getUser()));
+    public T user(String user) {
+        this._event.setUser(assignWithMacro(user, this._event.getUser()));
         return getReturnClass();
     }
 
-    public T user(String FormatString, Object... FormatArguments) {
-        return user(String.format(FormatString, FormatArguments));
+    public T user(String formatString, Object... formatArguments) {
+        return user(String.format(formatString, formatArguments));
     }
 
-    public T tags(String Tags) {
+    public T tags(String tags) {
         this._event.setTags(new ArrayList<String>());
-        return this.addTags(Tags);
+        return this.addTags(tags);
     }
 
-    public T tags(String[] Tags) {
+    public T tags(String[] tags) {
         this._event.setTags(new ArrayList<String>());
-        return this.addTags(Tags);
+        return this.addTags(tags);
     }
 
     public T addTags(String tags) {
-        this._event.getTags().addAll(Arrays.asList(net.loggr.utility.Tags.TokenizeAndFormat(tags)));
+        this._event.getTags().addAll(Arrays.asList(net.loggr.utility.Tags.tokenizeAndFormat(tags)));
         return getReturnClass();
     }
 
     public T addTags(String[] tags) {
-        this._event.getTags().addAll(Arrays.asList(net.loggr.utility.Tags.TokenizeAndFormat(tags)));
+        this._event.getTags().addAll(Arrays.asList(net.loggr.utility.Tags.tokenizeAndFormat(tags)));
         return getReturnClass();
     }
 
-    public T value(double Value) {
-        this._event.setValue(Value);
+    public T value(double value) {
+        this._event.setValue(value);
         return getReturnClass();
     }
 
@@ -112,22 +112,22 @@ public abstract class FluentEventBase<T> implements IFluentEvent<T> {
         return getReturnClass();
     }
 
-    public T data(String Data) {
-        this._event.setData(assignWithMacro(Data, this._event.getData()));
+    public T data(String data) {
+        this._event.setData(assignWithMacro(data, this._event.getData()));
         return getReturnClass();
     }
 
-    public T data(String FormatString, Object... FormatArguments) {
-        return data(String.format(FormatString, FormatArguments));
+    public T data(String formatString, Object... formatArguments) {
+        return data(String.format(formatString, formatArguments));
     }
 
-    public T addData(String Data) {
-        this._event.setData(this._event.getData() + assignWithMacro(Data, this._event.getData()));
+    public T addData(String data) {
+        this._event.setData(this._event.getData() + assignWithMacro(data, this._event.getData()));
         return getReturnClass();
     }
 
-    public T addData(String FormatString, Object... FormatArguments) {
-        return addData(String.format(FormatString, FormatArguments));
+    public T addData(String formatString, Object... formatArguments) {
+        return addData(String.format(formatString, formatArguments));
     }
 
     public T dataType(DataType type) {
@@ -135,26 +135,26 @@ public abstract class FluentEventBase<T> implements IFluentEvent<T> {
         return getReturnClass();
     }
 
-    public T geo(double Lat, double Lon) {
-        this._event.setGeo(String.format("%s,%s", Lat, Lon));
+    public T geo(double lat, double lon) {
+        this._event.setGeo(String.format("%s,%s", lat, lon));
         return getReturnClass();
     }
 
-    public T geo(String Lat, String Lon) {
-        double lat = 0, lon = 0;
+    public T geo(String lat, String lon) {
+        double latDouble = 0, lonDouble = 0;
         try {
-            lat = Double.parseDouble(Lat);
+            latDouble = Double.parseDouble(lat);
         } catch (NumberFormatException ex) {
             // no worries
         }
 
         try {
-            lon = Double.parseDouble(Lon);
+            lonDouble = Double.parseDouble(lon);
         } catch (NumberFormatException ex) {
             // no worries
         }
 
-        return this.geo(lat, lon);
+        return this.geo(latDouble, lonDouble);
     }
 
     public T geoIP(String IPAddress) {
@@ -167,8 +167,8 @@ public abstract class FluentEventBase<T> implements IFluentEvent<T> {
         return getReturnClass();
     }
 
-    public T useLog(String LogKey, String ApiKey) {
-        _client = new LogClient(LogKey, ApiKey);
+    public T useLog(String logKey, String apiKey) {
+        _client = new LogClient(logKey, apiKey);
         return getReturnClass();
     }
 
@@ -177,8 +177,8 @@ public abstract class FluentEventBase<T> implements IFluentEvent<T> {
         return (T) (this);
     }
 
-    protected String assignWithMacro(String Input, String Base) {
-        return Input.replace("$$", Base);
+    protected String assignWithMacro(String input, String base) {
+        return input.replace("$$", base);
     }
 
 

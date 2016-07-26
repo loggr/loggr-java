@@ -3,6 +3,8 @@ package net.loggr;
 import net.loggr.utility.Common;
 import net.loggr.utility.Configuration;
 import net.loggr.utility.Tags;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -12,10 +14,13 @@ import java.util.Arrays;
 
 
 public class LogClient {
-    protected String _apiKey = "";
-    protected String _logKey = "";
-    protected String _version = "";
-    protected String _server = "";
+
+    private static final Logger logger = LogManager.getLogger(LogWebClient.class);
+
+    private String _apiKey = "";
+    private String _logKey = "";
+    private String _version = "";
+    private String _server = "";
 
     public LogClient() {
         _logKey = Configuration.getLogKey();
@@ -63,104 +68,108 @@ public class LogClient {
         _server = value;
     }
 
-    public void post(Event Event, boolean Async) {
+    public void post(final Event event, boolean async) {
         // modify event based on configuration
-        mergeConfigurationWithEvent(Event);
+        mergeConfigurationWithEvent(event);
 
         // post async or sync
-        postBase(Event);
+        if (!async) {
+            postBase(event);
+        } else {
+            new Thread(new Runnable() {
+                public void run() {
+                    postBase(event);
+                }
+            }).start();
+        }
     }
 
-    protected void postBase(Event EventObj) {
+    protected void postBase(Event eventObj) {
         if (this._apiKey != null && this._apiKey != "" && this._logKey != null && this._logKey != "") {
             String url = String.format("http://%s/%s/logs/%s/events", this._server, this._version, this._logKey);
-            String postStr = String.format("%s&apikey=%s", createQuerystring(EventObj), this._apiKey);
+            String postStr = String.format("%s&apikey=%s", createQueryString(eventObj), this._apiKey);
             LogWebClient cli = new LogWebClient();
             cli.addHeader("Content-Type", "application/x-www-form-urlencoded");
             try {
-                cli.uploadData(new URL(url), "POST", postStr);
+                cli.uploadData(new URL(url), postStr);
             } catch (MalformedURLException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                logger.error(e);
             }
         }
     }
 
 
-    protected void mergeConfigurationWithEvent(Event Event) {
+    protected void mergeConfigurationWithEvent(Event event) {
         // merge in default tags from config file
-        if (!Common.IsNullOrEmpty(Configuration.getTags())) {
-            Event.getTags().addAll(Arrays.asList(Tags.TokenizeAndFormat(Configuration.getTags())));
+        if (!Common.isNullOrEmpty(Configuration.getTags())) {
+            event.getTags().addAll(Arrays.asList(Tags.tokenizeAndFormat(Configuration.getTags())));
         }
 
         // overwrite default source from config file
-        if (!Common.IsNullOrEmpty(Configuration.getSource())) {
-            Event.setSource(Configuration.getSource());
+        if (!Common.isNullOrEmpty(Configuration.getSource())) {
+            event.setSource(Configuration.getSource());
         }
     }
 
-    protected String createQuerystring(Event Event) {
+    protected String createQueryString(Event event) {
         String qs = "";
-        qs = (String) appendQuerystringNameValue("text", Event.getText(), qs);
-        qs = (String) appendQuerystringNameValue("link", Event.getLink(), qs);
-        qs = (String) appendQuerystringNameValueList("tags", Event.getTags(), qs);
-        qs = (String) appendQuerystringNameValue("source", Event.getSource(), qs);
-        qs = (String) appendQuerystringNameValue("user", Event.getUser(), qs);
-        if (Event.getDataType() == DataType.html) {
-            qs = (String) appendQuerystringNameValue("data", "@html" + System.getProperty("line.separator") + Event.getData(), qs);
-        } else if (Event.getDataType() == DataType.json) {
-            qs = (String) appendQuerystringNameValue("data", "@json" + System.getProperty("line.separator") + Event.getData(), qs);
+        qs = (String) appendQueryStringNameValue("text", event.getText(), qs);
+        qs = (String) appendQueryStringNameValue("link", event.getLink(), qs);
+        qs = (String) appendQueryStringNameValueList("tags", event.getTags(), qs);
+        qs = (String) appendQueryStringNameValue("source", event.getSource(), qs);
+        qs = (String) appendQueryStringNameValue("user", event.getUser(), qs);
+        if (event.getDataType() == DataType.html) {
+            qs = (String) appendQueryStringNameValue("data", "@html" + System.getProperty("line.separator") + event.getData(), qs);
+        } else if (event.getDataType() == DataType.json) {
+            qs = (String) appendQueryStringNameValue("data", "@json" + System.getProperty("line.separator") + event.getData(), qs);
         } else {
-            qs = (String) appendQuerystringNameValue("data", Event.getData(), qs);
+            qs = (String) appendQueryStringNameValue("data", event.getData(), qs);
         }
-        if (Event.getValue() != null) {
-            qs = (String) appendQuerystringNameValueObject("value", Event.getValue(), qs);
+        if (event.getValue() != null) {
+            qs = (String) appendQueryStringNameValueObject("value", event.getValue(), qs);
         }
-        if (Event.getGeo() != null) {
-            qs = (String) appendQuerystringNameValueObject("geo", Event.getGeo(), qs);
+        if (event.getGeo() != null) {
+            qs = (String) appendQueryStringNameValueObject("geo", event.getGeo(), qs);
         }
         return qs;
     }
 
-    protected Object appendQuerystringNameValue(String Name, String Value, String Querystring) {
-        if (Common.IsNullOrEmpty(Value))
-            return Querystring;
-        if (Querystring.length() > 0)
-            Querystring += "&";
+    protected Object appendQueryStringNameValue(String name, String value, String queryString) {
+        if (Common.isNullOrEmpty(value))
+            return queryString;
+        if (queryString.length() > 0)
+            queryString += "&";
         try {
-            Querystring += String.format("%s=%s", Name, java.net.URLEncoder.encode(Value, "UTF-8"));
+            queryString += String.format("%s=%s", name, java.net.URLEncoder.encode(value, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error(e);
         }
-        return Querystring;
+        return queryString;
     }
 
-    protected Object appendQuerystringNameValueObject(String Name, Object Value, String Querystring) {
-        if (Querystring.length() > 0)
-            Querystring += "&";
+    protected Object appendQueryStringNameValueObject(String name, Object value, String queryString) {
+        if (queryString.length() > 0)
+            queryString += "&";
         try {
-            Querystring += String.format("%s=%s", Name, java.net.URLEncoder.encode(Value.toString(), "UTF-8"));
+            queryString += String.format("%s=%s", name, java.net.URLEncoder.encode(value.toString(), "UTF-8"));
         } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error(e);
         }
-        return Querystring;
+        return queryString;
     }
 
-    protected Object appendQuerystringNameValueList(String Name, ArrayList<String> Value, String Querystring) {
-        if (Value.size() == 0)
-            return Querystring;
-        if (Querystring.length() > 0)
-            Querystring += "&";
-        String[] values = new String[Value.size()];
-        values = Value.toArray(values);
+    protected Object appendQueryStringNameValueList(String name, ArrayList<String> value, String queryString) {
+        if (value.size() == 0)
+            return queryString;
+        if (queryString.length() > 0)
+            queryString += "&";
+        String[] values = new String[value.size()];
+        values = value.toArray(values);
         try {
-            Querystring += String.format("%s=%s", Name, java.net.URLEncoder.encode(Common.Join(" ", values), "UTF-8"));
+            queryString += String.format("%s=%s", name, java.net.URLEncoder.encode(Common.join(" ", values), "UTF-8"));
         } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error(e);
         }
-        return Querystring;
+        return queryString;
     }
 }

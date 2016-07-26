@@ -1,130 +1,96 @@
 package net.loggr.utility;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Properties;
+import org.apache.commons.lang3.StringUtils;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class Configuration {
+    private static final String API_KEY_PROPERTY_NAME = "LOGGR_API_KEY";
+    private static final String LOG_KEY_PROPERTY_NAME = "LOGGR_LOG_KEY";
+    private static final String SERVER_PROPERTY_NAME = "LOGGR_SERVER";
+    private static final String DEFAULT_SERVER_PROPERTY = "post.loggr.net";
+    private static final String VERSION_PROPERTY_NAME = "LOGGR_VERSION";
+    private static final String DEFAULT_VERSION_PROPERTY = "1";
+    private static final String TAGS_PROPERTY_NAME = "LOGGR_TAGS";
+    private static final String SOURCE_PROPERTY_NAME = "LOGGR_SOURCE";
+
     private Configuration() {
     }
 
-    protected static String _apiKey = "";
-    protected static String _logKey = "";
-    protected static String _server = "";
-    protected static String _version = "";
-    protected static String _tags = "";
-    protected static String _source = "";
+    private static String _apiKey = "";
+    private static String _logKey = "";
+    private static String _server = "";
+    private static String _version = "";
+    private static String _tags = "";
+    private static String _source = "";
 
     public static String getApiKey() {
-        if (Common.IsNullOrEmpty(_apiKey)) {
-            try {
-                Properties props = new Properties();
-                FileInputStream in = new FileInputStream(System.getProperty("user.dir") + "/src/app.properties");
-                props.load(in);
-                in.close();
-
-                if (props != null) {
-                    _apiKey = props.getProperty("apiKey");
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+        if (Common.isNullOrEmpty(_apiKey)) {
+            _apiKey = getFromEnvOrSystemProperties(API_KEY_PROPERTY_NAME);
+            checkIfPresent(API_KEY_PROPERTY_NAME, _apiKey);
         }
         return _apiKey;
     }
 
     public static String getLogKey() {
-        if (Common.IsNullOrEmpty(_logKey)) {
-            try {
-                Properties props = new Properties();
-                FileInputStream in = new FileInputStream(System.getProperty("user.dir") + "/src/app.properties");
-                props.load(in);
-                in.close();
-
-                if (props != null) {
-                    _logKey = props.getProperty("logKey");
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+        if (Common.isNullOrEmpty(_logKey)) {
+            _logKey = getFromEnvOrSystemProperties(LOG_KEY_PROPERTY_NAME);
+            checkIfPresent(LOG_KEY_PROPERTY_NAME, _logKey);
         }
         return _logKey;
     }
 
     public static String getServer() {
-        if (Common.IsNullOrEmpty(_server)) {
-            try {
-                Properties props = new Properties();
-                FileInputStream in = new FileInputStream(System.getProperty("user.dir") + "/src/app.properties");
-                props.load(in);
-                in.close();
-
-                if (props != null) {
-                    _server = props.getProperty("server");
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
+        if (Common.isNullOrEmpty(_server)) {
+            _server = getFromEnvOrSystemProperties(SERVER_PROPERTY_NAME);
+            if (StringUtils.isBlank(_server)) {
+                _server = DEFAULT_SERVER_PROPERTY;
             }
         }
         return _server;
     }
 
     public static String getVersion() {
-        if (Common.IsNullOrEmpty(_version)) {
-            try {
-                Properties props = new Properties();
-                FileInputStream in = new FileInputStream(System.getProperty("user.dir") + "/src/app.properties");
-                props.load(in);
-                in.close();
-
-                if (props != null) {
-                    _version = props.getProperty("version");
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
+        if (Common.isNullOrEmpty(_version)) {
+            _version = getFromEnvOrSystemProperties(VERSION_PROPERTY_NAME);
+            if (StringUtils.isBlank(_version)) {
+                _version = DEFAULT_VERSION_PROPERTY;
             }
         }
         return _version;
     }
 
     public static String getTags() {
-        if (Common.IsNullOrEmpty(_tags)) {
-            try {
-                _tags = "";
+        if (Common.isNullOrEmpty(_tags)) {
+            _tags = "";
 
-                Properties props = new Properties();
-                FileInputStream in = new FileInputStream(System.getProperty("user.dir") + "/src/app.properties");
-                props.load(in);
-                in.close();
-
-                if (props != null) {
-                    _tags = props.getProperty("tags");
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+            _tags = getFromEnvOrSystemProperties(TAGS_PROPERTY_NAME);
         }
         return (_tags);
     }
 
     public static String getSource() {
-        if (Common.IsNullOrEmpty(_source)) {
-            try {
-                _source = "";
+        if (Common.isNullOrEmpty(_source)) {
+            _source = "";
 
-                Properties props = new Properties();
-                FileInputStream in = new FileInputStream(System.getProperty("user.dir") + "/src/app.properties");
-                props.load(in);
-                in.close();
-
-                if (props != null) {
-                    _source = props.getProperty("source");
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+            _source = getFromEnvOrSystemProperties(SOURCE_PROPERTY_NAME);
         }
         return (_source);
+    }
+
+    private static String getFromEnvOrSystemProperties(String propName) {
+        String propValue = System.getenv(propName);
+        if (StringUtils.isBlank(propValue)) {
+            propValue = System.getProperty(propName);
+        }
+
+        return propValue;
+    }
+
+    private static void checkIfPresent(String propertyName, String propertyValue) {
+        if (isBlank(propertyValue)) {
+            throw new IllegalArgumentException("Please specify correct \'" + propertyName + "\' property.");
+        }
     }
 
 }

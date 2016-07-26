@@ -1,5 +1,8 @@
 package net.loggr;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
@@ -10,72 +13,73 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class LogWebClient {
-    private Hashtable<String, String> _headers;
 
-    public LogWebClient() {
-        _headers = new Hashtable<String, String>();
-    }
+	private static final Logger logger = LogManager.getLogger(LogWebClient.class);
 
-    public void addHeader(String key, String value) {
-        if (_headers.containsKey(key)) {
-            String oldVal = _headers.get(key);
-            _headers.put(key, oldVal + value);
-        } else {
-            _headers.put(key, value);
-        }
-    }
+	private Hashtable<String, String> _headers;
 
-    public InputStream makeAsyncRequest(URL url) throws InterruptedException, ExecutionException {
-        ExecutorService executor = Executors.newFixedThreadPool(1);
+	public LogWebClient() {
+		_headers = new Hashtable<String, String>();
+	}
 
-        Future<AsyncWebResponse> response = executor.submit(new AsyncWebRequest(url));
+	public void addHeader(String key, String value) {
+		if (_headers.containsKey(key)) {
+			String oldVal = _headers.get(key);
+			_headers.put(key, oldVal + value);
+		} else {
+			_headers.put(key, value);
+		}
+	}
 
-        InputStream body = response.get().getBody();
+	public InputStream makeAsyncRequest(URL url) throws InterruptedException, ExecutionException {
+		ExecutorService executor = Executors.newFixedThreadPool(1);
 
-        executor.shutdown();
+		Future<AsyncWebResponse> response = executor.submit(new AsyncWebRequest(url));
 
-        return (body);
-    }
+		InputStream body = response.get().getBody();
 
-    public String uploadData(URL url, String method, String postStr) {
-        // TODO Auto-generated method stub
-        String failure = "";
-        try {
-            URL _url = new URL(url.toExternalForm());
+		executor.shutdown();
 
-            URLConnection urlConn = _url.openConnection();
+		return (body);
+	}
 
-            urlConn.setDoInput(true);
+	public String uploadData(URL url, String postStr) {
+		String failure;
+		try {
+			URL _url = new URL(url.toExternalForm());
 
-            urlConn.setDoOutput(true);
+			URLConnection urlConn = _url.openConnection();
 
-            urlConn.setUseCaches(false);
+			urlConn.setDoInput(true);
 
-            urlConn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            DataOutputStream output = new DataOutputStream(urlConn.getOutputStream());
+			urlConn.setDoOutput(true);
 
-            output.writeBytes(postStr);
-            output.flush();
-            output.close();
-            System.out.println("URL: " + _url.toExternalForm());
-            System.out.println("PostStr: " + postStr);
-            BufferedReader input = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
+			urlConn.setUseCaches(false);
 
-            String response = "";
+			urlConn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			DataOutputStream output = new DataOutputStream(urlConn.getOutputStream());
 
-            String str;
+			output.writeBytes(postStr);
+			output.flush();
+			output.close();
+			logger.info("URL: " + _url.toExternalForm());
+			logger.info("PostStr: " + postStr);
+			BufferedReader input = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
 
-            while ((str = input.readLine()) != null) {
-                response += str;
-            }
+			String response = "";
 
-            return (response);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            failure = e.getMessage();
-        }
+			String str;
 
-        return (failure);
-    }
+			while ((str = input.readLine()) != null) {
+				response += str;
+			}
+
+			return (response);
+		} catch (IOException e) {
+			logger.error(e);
+			failure = e.getMessage();
+		}
+
+		return (failure);
+	}
 }

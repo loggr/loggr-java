@@ -10,7 +10,6 @@ public class AsyncWebRequest implements Callable<AsyncWebResponse> {
         this.url = url;
     }
 
-    @Override
     public AsyncWebResponse call() throws Exception {
         return new AsyncWebResponse(url.openStream());
     }

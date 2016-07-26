@@ -4,25 +4,25 @@ import java.util.ArrayList;
 
 public class Tags {
 
-    public static String[] TokenizeAndFormat(String[] Tags) {
-        return (TokenizeAndFormat(Tags, true));
+    public static String[] tokenizeAndFormat(String[] tags) {
+        return (tokenizeAndFormat(tags, true));
     }
 
-    public static String[] TokenizeAndFormat(String[] Tags, boolean StripSpecialChars) {
-        return TokenizeAndFormat(Common.Join(" ", Tags), StripSpecialChars);
+    private static String[] tokenizeAndFormat(String[] tags, boolean stripSpecialChars) {
+        return tokenizeAndFormat(Common.join(" ", tags), stripSpecialChars);
     }
 
-    public static String[] TokenizeAndFormat(String Tagstring) {
-        return (TokenizeAndFormat(Tagstring, true));
+    public static String[] tokenizeAndFormat(String tagstring) {
+        return (tokenizeAndFormat(tagstring, true));
     }
 
-    public static String[] TokenizeAndFormat(String Tagstring, boolean StripSpecialChars) {
+    private static String[] tokenizeAndFormat(String tagstring, boolean stripSpecialChars) {
         ArrayList<String> res = new ArrayList<String>();
-        String[] tokens = Tagstring.toLowerCase().split(" ");
-        tokens = Common.RemoveEmptyEntries(tokens);
+        String[] tokens = tagstring.toLowerCase().split(" ");
+        tokens = Common.removeEmptyEntries(tokens);
         for (int i = 0; i <= (tokens.length - 1); i++) {
-            String token = null;
-            if (StripSpecialChars) {
+            String token;
+            if (stripSpecialChars) {
                 token = tokens[i].trim().replaceAll("[^a-zA-Z0-9\\-]", "");
             } else {
                 token = tokens[i].trim();
